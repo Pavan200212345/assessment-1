@@ -27,10 +27,10 @@ jobs:
       - name: Build backend Docker image
         run: |
           docker build \
-            -t ghcr.io/${{ github.repository_owner }}/employee-backend:latest \
+            -t ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/employee-backend:latest \
             ./app/backend
 
       - name: Push backend Docker image
         run: |
           docker push \
-            ghcr.io/${{ github.repository_owner }}/employee-backend:latest
+            ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/employee-backend:latest
