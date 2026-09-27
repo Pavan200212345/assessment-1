@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Employee Management System</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+        <div class="logo">
+            <div class="logo-icon">EM</div>
+            <div>
+                <h2>Emplyo</h2>
+                <span>Management System</span>
+            </div>
+        </div>
+
+        <nav>
+            <a href="#" class="nav-item active">
+                <span>▣</span>
+                Dashboard
+            </a>
+
+            <a href="#" class="nav-item">
+                <span>♙</span>
+                Employees
+            </a>
+
+            <a href="#" class="nav-item">
+                <span>▤</span>
+                Reports
+            </a>
+
+            <a href="#" class="nav-item">
+                <span>⚙</span>
+                Settings
+            </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <div class="server-status">
+                <span class="status-dot"></span>
+                System Online
+            </div>
+        </div>
+
+    </aside>
+
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Top Bar -->
+        <header class="topbar">
+
+            <div>
+                <h1>Employee Dashboard</h1>
+                <p>Manage your organization's employees</p>
+            </div>
+
+            <div class="profile">
+                <div class="avatar">P</div>
+
+                <div>
+                    <strong>Admin</strong>
+                    <small>Administrator</small>
+                </div>
+            </div>
+
+        </header>
+
+
+        <!-- Statistics -->
+        <section class="stats">
+
+            <div class="stat-card">
+                <div class="stat-icon blue">👥</div>
+
+                <div>
+                    <span>Total Employees</span>
+                    <h2 id="totalEmployees">0</h2>
+                </div>
+            </div>
+
+
+            <div class="stat-card">
+                <div class="stat-icon green">✓</div>
+
+                <div>
+                    <span>Active Employees</span>
+                    <h2 id="activeEmployees">0</h2>
+                </div>
+            </div>
+
+
+            <div class="stat-card">
+                <div class="stat-icon purple">▣</div>
+
+                <div>
+                    <span>Departments</span>
+                    <h2 id="totalDepartments">0</h2>
+                </div>
+            </div>
+
+
+            <div class="stat-card">
+                <div class="stat-icon orange">↗</div>
+
+                <div>
+                    <span>New This Month</span>
+                    <h2 id="newEmployees">0</h2>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- Employee Section -->
+        <section class="employee-section">
+
+            <div class="section-header">
+
+                <div>
+                    <h2>Employees</h2>
+                    <p>Manage employee information and records</p>
+                </div>
+
+                <button class="add-btn" onclick="openModal()">
+                    + Add Employee
+                </button>
+
+            </div>
+
+
+            <!-- Search -->
+            <div class="toolbar">
+
+                <div class="search-box">
+                    <span>⌕</span>
+
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Search employees..."
+                        onkeyup="searchEmployees()"
+                    >
+                </div>
+
+                <select id="departmentFilter">
+                    <option value="">All Departments</option>
+                    <option value="Engineering">Engineering</option>
+                    <option value="HR">HR</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Marketing">Marketing</option>
+                </select>
+
+            </div>
+
+
+            <!-- Employee Table -->
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>EMPLOYEE</th>
+                            <th>ROLE</th>
+                            <th>DEPARTMENT</th>
+                            <th>EMAIL</th>
+                            <th>ACTION</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="employeeTable">
+
+                        <!-- Temporary sample data -->
+                        <tr>
+
+                            <td>
+                                <div class="employee-info">
+
+                                    <div class="employee-avatar">
+                                        PG
+                                    </div>
+
+                                    <div>
+                                        <strong>Pavan Gowda</strong>
+                                        <small>ID: EMP001</small>
+                                    </div>
+
+                                </div>
+                            </td>
+
+                            <td>Cloud Engineer</td>
+
+                            <td>
+                                <span class="department engineering">
+                                    Engineering
+                                </span>
+                            </td>
+
+                            <td>
+                                pavan@example.com
+                            </td>
+
+                            <td>
+                                <button class="action-btn edit">
+                                    Edit
+                                </button>
+
+                                <button class="action-btn delete">
+                                    Delete
+                                </button>
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                <div class="employee-info">
+
+                                    <div class="employee-avatar purple-avatar">
+                                        RS
+                                    </div>
+
+                                    <div>
+                                        <strong>Rahul Sharma</strong>
+                                        <small>ID: EMP002</small>
+                                    </div>
+
+                                </div>
+                            </td>
+
+                            <td>Software Engineer</td>
+
+                            <td>
+                                <span class="department engineering">
+                                    Engineering
+                                </span>
+                            </td>
+
+                            <td>
+                                rahul@example.com
+                            </td>
+
+                            <td>
+                                <button class="action-btn edit">
+                                    Edit
+                                </button>
+
+                                <button class="action-btn delete">
+                                    Delete
+                                </button>
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- Footer -->
+
+        <footer>
+            Employee Management System
+            <span>•</span>
+            Cloud & DevOps Project
+        </footer>
+
+    </main>
+
+
+    <!-- Add Employee Modal -->
+
+    <div class="modal-overlay" id="employeeModal">
+
+        <div class="modal">
+
+            <div class="modal-header">
+
+                <div>
+                    <h2>Add Employee</h2>
+                    <p>Enter employee information</p>
+                </div>
+
+                <button onclick="closeModal()" class="close-btn">
+                    ×
+                </button>
+
+            </div>
+
+
+            <form id="employeeForm">
+
+                <div class="form-group">
+
+                    <label>Full Name</label>
+
+                    <input
+                        type="text"
+                        id="name"
+                        placeholder="Enter employee name"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>Email</label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        placeholder="employee@example.com"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label>Role</label>
+
+                        <input
+                            type="text"
+                            id="role"
+                            placeholder="Software Engineer"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Department</label>
+
+                        <select id="department" required>
+
+                            <option value="">
+                                Select department
+                            </option>
+
+                            <option value="Engineering">
+                                Engineering
+                            </option>
+
+                            <option value="HR">
+                                HR
+                            </option>
+
+                            <option value="Finance">
+                                Finance
+                            </option>
+
+                            <option value="Marketing">
+                                Marketing
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <div class="modal-actions">
+
+                    <button
+                        type="button"
+                        class="cancel-btn"
+                        onclick="closeModal()"
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="save-btn"
+                    >
+                        Add Employee
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <script src="app.js"></script>
+
+</body>
+</html>
