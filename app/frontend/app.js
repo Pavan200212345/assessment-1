@@ -2,7 +2,7 @@
 // API CONFIGURATION
 // ===============================
 
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "/api";
 
 let employees = [];
 
@@ -29,7 +29,7 @@ async function loadEmployees() {
     try {
 
         const response =
-            await fetch(`${API_URL}/api/employees`);
+            await fetch(`${API_URL}/employees`);
 
         if (!response.ok) {
             throw new Error("Failed to load employees");
@@ -290,7 +290,7 @@ document
 
                 response =
                     await fetch(
-                        `${API_URL}/api/employees/${editingEmployeeId}`,
+                        `${API_URL}/employees/${editingEmployeeId}`,
                         {
                             method: "PUT",
 
