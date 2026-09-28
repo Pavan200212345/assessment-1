@@ -5,67 +5,105 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
 
-    permissions:
-      contents: read
-      packages: write
+    runs-on: ubuntu-latest
 
     steps:
 
-      # 1. Get repository code
+      # ==========================================================
+      # 1. Checkout source code
+      # ==========================================================
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      # 2. Log in to GitHub Container Registry
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
+
+      # ==========================================================
+      # 2. Login to GitHub Container Registry
+      # ==========================================================
+      - name: Login to GHCR
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 3. Build Docker image
-      - name: Build Docker image
-        run: |
-          docker build \
-            -t ghcr.io/${{ github.repository_owner }}/taskflow:latest .
 
-      # 4. Push Docker image
-      - name: Push Docker image
-        run: |
-          docker push \
-            ghcr.io/${{ github.repository_owner }}/taskflow:latest
+      # ==========================================================
+      # 3. Build and push Docker image
+      # ==========================================================
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/pavan200212345/taskflow:latest
 
-      # 5. Deploy to Server 1
+
+      # ==========================================================
+      # 4. Deploy image to Server 1
+      # ==========================================================
       - name: Deploy to Server 1
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
+
           script: |
+
             set -e
 
-            echo "Pulling latest image..."
+            echo "======================================"
+            echo " Deploying TaskFlow"
+            echo "======================================"
 
-            docker pull \
-              ghcr.io/${{ github.repository_owner }}/taskflow:latest
+            IMAGE="ghcr.io/pavan200212345/taskflow:latest"
+            CONTAINER="taskflow-nginx"
 
-            echo "Stopping old container..."
+            echo ""
+            echo "[1/5] Checking Docker..."
 
-            docker rm -f taskflow-nginx 2>/dev/null || true
+            if ! command -v docker >/dev/null 2>&1; then
+              echo "ERROR: Docker is not installed."
+              exit 1
+            fi
 
-            echo "Starting new container..."
+            echo ""
+            echo "[2/5] Logging into GHCR..."
+
+            echo "${{ secrets.GHCR_TOKEN }}" | \
+              docker login ghcr.io \
+              -u "${{ secrets.GHCR_USERNAME }}" \
+              --password-stdin
+
+            echo ""
+            echo "[3/5] Pulling latest image..."
+
+            docker pull "$IMAGE"
+
+            echo ""
+            echo "[4/5] Replacing old container..."
+
+            docker rm -f "$CONTAINER" 2>/dev/null || true
 
             docker run -d \
-              --name taskflow-nginx \
+              --name "$CONTAINER" \
               --restart unless-stopped \
               -p 80:80 \
-              ghcr.io/${{ github.repository_owner }}/taskflow:latest
+              "$IMAGE"
 
-            echo "Deployment completed."
+            echo ""
+            echo "[5/5] Checking deployment..."
+
+            sleep 5
 
             docker ps
+
+            echo ""
+            echo "Deployment completed successfully."
