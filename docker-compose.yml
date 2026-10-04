@@ -1,0 +1,151 @@
+# Docker Compose Configuration for Local Todo App Development
+# This file defines 4 services: Database, 2 App Servers, and Load Balancer (Nginx)
+
+version: '3.8'  # Docker Compose version
+
+services:
+  # ========================================
+  # DATABASE SERVICE (PostgreSQL)
+  # ========================================
+  db:
+    image: postgres:15-alpine  # PostgreSQL version 15 (lightweight Alpine Linux)
+    container_name: todo-db     # Container name for reference
+    
+    # Environment variables for PostgreSQL setup
+    environment:
+      POSTGRES_USER: todouser              # Database user
+      POSTGRES_PASSWORD: todopassword      # Database password
+      POSTGRES_DB: tododb                  # Database name
+    
+    # Port mapping: <host-port>:<container-port>
+    ports:
+      - "5432:5432"  # Access DB from Windows machine on localhost:5432
+    
+    # Data persistence and initialization
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Persistent storage for DB files
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # SQL script to run on startup
+    
+    # Network for inter-container communication
+    networks:
+      - app-network
+    
+    # Restart policy
+    restart: always
+    
+    # Health check to ensure DB is ready before apps start
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U todouser -d tododb"]
+      interval: 10s        # Check every 10 seconds
+      timeout: 5s          # Timeout after 5 seconds
+      retries: 5           # Retry 5 times before marking unhealthy
+
+  # ========================================
+  # APP SERVER 1
+  # ========================================
+  app-server-1:
+    build: .  # Build Docker image from Dockerfile in current directory
+    container_name: todo-app-1
+    
+    # Environment variables for Flask app
+    environment:
+      DB_HOST: db                      # Database hostname (container name)
+      DB_PORT: 5432                    # Database port
+      DB_NAME: tododb                  # Database name
+      DB_USER: todouser                # Database user
+      DB_PASSWORD: todopassword        # Database password
+      SERVER_NAME: Server-1            # Server identifier for response header
+    
+    # Port mapping: expose app on 8001
+    ports:
+      - "8001:5000"  # Access app from Windows on localhost:8001
+    
+    # Wait for database to be healthy before starting app
+    depends_on:
+      db:
+        condition: service_healthy  # Wait for DB health check to pass
+    
+    # Mount app files for live development (hot reload)
+    volumes:
+      - ./app.py:/usr/src/app/app.py           # Python application code
+      - ./index.html:/usr/src/app/index.html   # Frontend HTML
+    
+    # Connect to app network for inter-container communication
+    networks:
+      - app-network
+    
+    # Auto-restart if container crashes
+    restart: always
+
+  # ========================================
+  # APP SERVER 2 (Identical to Server 1)
+  # ========================================
+  app-server-2:
+    build: .
+    container_name: todo-app-2
+    
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: tododb
+      DB_USER: todouser
+      DB_PASSWORD: todopassword
+      SERVER_NAME: Server-2  # Different identifier for this server
+    
+    # Port mapping: expose app on 8002 (different from Server 1)
+    ports:
+      - "8002:5000"  # Access app from Windows on localhost:8002
+    
+    # Wait for database to be healthy
+    depends_on:
+      db:
+        condition: service_healthy
+    
+    # Same volume mounts as Server 1
+    volumes:
+      - ./app.py:/usr/src/app/app.py
+      - ./index.html:/usr/src/app/index.html
+    
+    networks:
+      - app-network
+    
+    restart: always
+
+  # ========================================
+  # LOAD BALANCER (Nginx)
+  # ========================================
+  nginx:
+    image: nginx:latest  # Official Nginx image
+    container_name: todo-nginx
+    
+    # Port mapping: expose load balancer on port 80
+    ports:
+      - "80:80"  # Access app from Windows on localhost:80
+    
+    # Mount Nginx configuration file
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro  # :ro means read-only
+    
+    # Depends on both app servers being healthy
+    depends_on:
+      - app-server-1
+      - app-server-2
+    
+    # Connect to app network
+    networks:
+      - app-network
+    
+    restart: always
+
+# ========================================
+# PERSISTENT VOLUMES (Named volumes)
+# ========================================
+volumes:
+  postgres_data:  # This volume persists database files across container restarts
+
+# ========================================
+# NETWORKS (Custom network for container communication)
+# ========================================
+networks:
+  app-network:
+    driver: bridge  # Bridge network allows containers to communicate by container name

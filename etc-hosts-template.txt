@@ -1,0 +1,18 @@
+# Add these lines to /etc/hosts on Server 3 (Nginx LB)
+# This maps hostnames to IP addresses for DNS resolution
+
+# Replace with your actual IPs:
+# 192.168.1.10  app-server-1.local
+# 192.168.1.11  app-server-2.local
+# 192.168.1.12  database.local
+
+# EXAMPLE /etc/hosts file:
+127.0.0.1       localhost
+::1             localhost ip6-localhost ip6-loopback
+ff02::1         ip6-allnodes
+ff02::2         ip6-allrouters
+
+# YOUR SERVERS - Replace IPs with your actual server IPs:
+SERVER1_IP      app-server-1.local
+SERVER2_IP      app-server-2.local
+SERVER4_IP      database.local
